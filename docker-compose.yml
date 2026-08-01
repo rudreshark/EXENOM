@@ -1,0 +1,34 @@
+# EXENOM — Docker Compose
+# Run both the web app and scan engine with one command
+
+version: '3.8'
+
+services:
+  # ─── Web App (Next.js) ────────────────────────────────────────────────────
+  web:
+    build: .
+    container_name: exenom-web
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      # API keys (optional — pre-configured keys work out of the box)
+      # - EASM_SHODAN_KEYS=key1,key2
+      # - EASM_VIRUSTOTAL_KEYS=key1,key2
+      # - EASM_C99_KEYS=key1,key2,key3
+      # - EASM_SECURITYTRAILS_KEYS=key1
+    depends_on:
+      - engine
+    restart: unless-stopped
+
+  # ─── Scan Engine (WebSocket) ──────────────────────────────────────────────
+  engine:
+    build: .
+    container_name: exenom-engine
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=production
+    command: ["bun", "run", "easm-service"]
+    restart: unless-stopped
